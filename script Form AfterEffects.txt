@@ -1,0 +1,86 @@
+
+var  folderNameOfItems= prompt('enter folder name which cntains your logos')
+//'my logos';
+var  folderNamepath = "~/Desktop/"+prompt("enter the name of folder which contains your images in your Desctop");
+var oldLogoComp =prompt('enter the compostion name which have the logo .') ;
+var layerLevel = 3;
+
+
+function importFiles(files, folderName) {
+    app.beginSuppressDialogs();
+    // additionally you can create the folder in AE to put all your imported files into
+    var folder = app.project.items.addFolder(folderName);
+    var imported;
+    for(var i = 0; i < files.length; i++) {
+        // only import it if its not a folder
+        if(files[i].name.indexOf(".") != -1) {
+            imported = app.project.importFile(new ImportOptions(files[i]));
+            imported.parentFolder = folder;
+        }
+     }
+    app.endSuppressDialogs(false);
+}
+
+
+
+//#################################
+// f1 - first step import your files from your pc 
+fileExists=false;
+for(i=1; i<= app.project.items.length; i++){
+    if( app.project.items[i].name==folderNameOfItems) 
+        fileExists=true;
+}
+if(fileExists==false)        
+    importFiles( Folder(folderNamepath).getFiles(),folderNameOfItems)
+//#################################
+
+
+2// define the comp 
+var myComp;
+var allItems = app.project.items;
+var RenderComp;
+var RendeCompName= prompt ('enter the composition which will render .' ) ;
+
+for(i=1; i<=allItems.length; i++)
+  if(allItems[i].name == oldLogoComp )
+    myComp= allItems[i];
+
+for (var i = 1; i <= allItems.length; i ++) {
+   // if ((app.project.item(i) instanceof CompItem) && (app.project.item(i).name === 'Pre-comp 3')) {
+    if ( allItems[i].name ==RendeCompName) {
+        RenderComp = allItems[i];
+      break;
+    }
+}
+
+3//  replace old image from layer with new image from items 
+
+var mylogo;
+ var sourceFolderName= prompt ('enter distination folder in your desktop');
+
+for(i=1;i<=allItems.length;i++){
+    if(allItems[i].parentFolder.name == folderNameOfItems){
+           // try{
+            var item = allItems[i];
+            var layer1 = myComp.layer(layerLevel);
+            layer1.replaceSource(item, true);
+            
+          // Define the comp will render
+            RenderComp.name= item.name;
+            var item = app.project.renderQueue.items.add(RenderComp);
+            var outputModule = item.outputModule(1);
+            new Folder("~/Desktop/"+sourceFolderName);
+             outputModule.file=  File("~/Desktop/"+sourceFolderName+"/"+allItems[i].name);
+              
+              app.project.renderQueue.queueInAME(true);
+              $.sleep (2000)
+
+       }
+
+
+            //app.project.renderQueue.items.remove(RenderComp);
+            //}catch(e){alert('error');}
+    }
+      
+
+
